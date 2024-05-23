@@ -1,6 +1,7 @@
 package com.rajat.EmployeeManagementPortal.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
@@ -11,8 +12,12 @@ import java.util.List;
 public class Manager {
 
     @Id
-    private Long id;
-    private String email;
+    private Long userId;
+
+    @MapsId
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId")
+    private User user;
 
     @OneToMany(mappedBy = "manager")
     private List<Project> projects;

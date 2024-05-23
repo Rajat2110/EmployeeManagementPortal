@@ -7,15 +7,19 @@ import lombok.Data;
 @Entity
 @Data
 @Builder
-public class EmployeeSkill {
+@Table(name = "resource")
+public class Request {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    private String skill;
 
-    @ManyToOne
-    private Employee employee;
+    private int employeesRequired;
 
-    @ManyToOne
-    private Skill skill;
+    private String requestedBy;
+
+    @Enumerated(EnumType.STRING)
+    private STATUS status;
+
 }

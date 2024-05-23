@@ -3,6 +3,7 @@ package com.rajat.EmployeeManagementPortal.controller;
 import com.rajat.EmployeeManagementPortal.request.LoginRequest;
 import com.rajat.EmployeeManagementPortal.request.RegisterRequest;
 import com.rajat.EmployeeManagementPortal.response.AuthenticationResponse;
+import com.rajat.EmployeeManagementPortal.response.ProfileResponse;
 import com.rajat.EmployeeManagementPortal.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,5 +25,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authenticationService.login(request));
+    }
+
+    @GetMapping("/userProfile")
+    public ResponseEntity<ProfileResponse> userProfile() {
+        return ResponseEntity.ok(authenticationService.userProfile());
     }
 }

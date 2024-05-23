@@ -1,8 +1,12 @@
 package com.rajat.EmployeeManagementPortal.controller;
 
-import com.rajat.EmployeeManagementPortal.model.Project;
+import com.rajat.EmployeeManagementPortal.model.Request;
+import com.rajat.EmployeeManagementPortal.model.Skill;
 import com.rajat.EmployeeManagementPortal.model.User;
+import com.rajat.EmployeeManagementPortal.response.ProjectListResponse;
+import com.rajat.EmployeeManagementPortal.response.UserListResponse;
 import com.rajat.EmployeeManagementPortal.service.AdminService;
+import com.rajat.EmployeeManagementPortal.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +21,51 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    @GetMapping("/home")
-    public String adminHome() {
-        return "this is admin home!";
-    }
+    @Autowired
+    private ProjectService projectService;
 
     @GetMapping("/viewAll")
-    public ResponseEntity<List<User>> viewAll() {
+    public ResponseEntity<List<UserListResponse>> viewAll() {
         return ResponseEntity.ok(adminService.viewAll());
     }
 
+    @GetMapping("/projects")
+    public ResponseEntity<List<ProjectListResponse>> projects() {
+        return ResponseEntity.ok(projectService.allProjects());
+    }
+
     @PostMapping("/createProject")
-    public ResponseEntity<String> createProject(@RequestBody Project project) {
-        return ResponseEntity.ok(adminService.createProject(), HttpStatus.CREATED);
+    public ResponseEntity<String> createProject(@RequestParam String projectName, @RequestParam Long id) {
+        return new ResponseEntity<>(projectService.createProject(projectName, id), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/assignProject")
+    public ResponseEntity<String> assignProject(@RequestParam Long empId, @RequestParam String projectName) {
+        return ResponseEntity.ok(projectService.assignProject(empId, projectName));
+    }
+
+    @PostMapping("/newSkill")
+    public ResponseEntity<String> addNewSkill(@RequestBody Skill skill) {
+        return new ResponseEntity<>(adminService.addNewSkill(skill), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/viewRequests")
+    public ResponseEntity<List<Request>> viewRequests(){
+        return ResponseEntity.ok(adminService.viewRequests());
+    }
+
+    @PutMapping("/approveRequest")
+    public ResponseEntity<String> approveRequest(@RequestBody Request request) {
+        return ResponseEntity.ok(adminService.approveRequest(request));
+    }
+
+    @PutMapping("/viewAll/update/{id}")
+    public ResponseEntity<String> updateEmployee(@PathVariable Long id, @RequestBody User details) {
+        return ResponseEntity.ok(adminService.updateEmployee(id, details));
+    }
+
+    @DeleteMapping("/viewAll/delete/{id}")
+    public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.deleteEmployee(id));
     }
 }

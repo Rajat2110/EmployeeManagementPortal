@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -16,5 +18,7 @@ public class RegisterRequest {
     private String password;
     private Long contact;
     private String name;
+    private Character gender;
+    private String dateOfBirth;
     private USER_ROLE role;
 }

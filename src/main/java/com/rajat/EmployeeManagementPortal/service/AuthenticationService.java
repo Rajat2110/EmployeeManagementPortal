@@ -11,10 +11,13 @@ import com.rajat.EmployeeManagementPortal.repository.UserRepository;
 import com.rajat.EmployeeManagementPortal.request.LoginRequest;
 import com.rajat.EmployeeManagementPortal.request.RegisterRequest;
 import com.rajat.EmployeeManagementPortal.response.AuthenticationResponse;
+import com.rajat.EmployeeManagementPortal.response.ProfileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,31 +44,33 @@ public class AuthenticationService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
         var user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .contact(request.getContact())
+                .gender(request.getGender())
+                .dateOfBirth(request.getDateOfBirth())
                 .role(request.getRole())
                 .build();
 
         var savedUser = userRepository.save(user);
 
-        if(user.getRole()== USER_ROLE.EMPLOYEE){
-            Employee employee = new Employee();
-            employee.setEmail(user.getEmail());
-            employee.setProject(null);
-            employeeRepository.save(employee);
-        } else if(user.getRole()==USER_ROLE.MANAGER) {
+        if(user.getRole()== USER_ROLE.MANAGER){
             Manager manager = new Manager();
-            manager.setEmail(user.getEmail());
+            manager.setUser(user);
             managerRepository.save(manager);
+        } else if (user.getRole()==USER_ROLE.EMPLOYEE) {
+            Employee employee = new Employee();
+            employee.setUser(user);
+            employeeRepository.save(employee);
         }
+
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .jwt(jwtToken)
+                .role(savedUser.getRole())
                 .build();
     }
 
@@ -80,9 +85,22 @@ public class AuthenticationService {
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .jwt(jwtToken)
+                .role(user.getRole())
                 .build();
     }
 
+    public ProfileResponse userProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        return ProfileResponse.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .contact(user.getContact())
+                .gender(user.getGender())
+                .role(user.getRole())
+                .build();
+    }
 }
 

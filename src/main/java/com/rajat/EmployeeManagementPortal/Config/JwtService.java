@@ -33,9 +33,13 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails){
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        String roles = populateAuthorities(authorities);
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
+                .claim("roles", roles)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
@@ -68,5 +72,13 @@ public class JwtService {
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private String populateAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        Set<String> auths = new HashSet<>();
+        for(GrantedAuthority authority: authorities) {
+            auths.add(authority.getAuthority());
+        }
+        return String.join(",", auths);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -21,10 +22,15 @@ import java.util.List;
 public class User implements UserDetails{
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
+    @Column(unique = true)
     private String email;
     private String password;
     private String name;
     private Long contact;
+    private Character gender;
+    private String dateOfBirth;
     @Enumerated(EnumType.STRING)
     private USER_ROLE role;
 
