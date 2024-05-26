@@ -13,19 +13,19 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 public class ProjectRepositoryTest {
 
-    @Autowired
-    private ProjectRepository projectRepository;
+  @Autowired
+  private ProjectRepository projectRepository;
 
-    @Test
-    public void findProjectByNameTest() {
-        Project project = Project.builder()
-                .projectName("Quiz Application")
-                .build();
+  @Test
+  public void findProjectByNameTest() {
+    Project project = Project.builder()
+      .projectName("Quiz Application")
+      .build();
 
-        projectRepository.save(project);
-        Project foundProject = projectRepository.findByProjectName(project.getProjectName()).get();
+    projectRepository.save(project);
+    Project foundProject = projectRepository.findByProjectName(project.getProjectName()).get();
 
-        Assertions.assertThat(foundProject).isNotNull();
-        Assertions.assertThat(foundProject.getProjectName()).isEqualTo(project.getProjectName());
-    }
+    Assertions.assertThat(foundProject).isNotNull();
+    Assertions.assertThat(foundProject.getProjectName()).isEqualTo(project.getProjectName());
+  }
 }
