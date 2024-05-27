@@ -1,16 +1,17 @@
 package com.rajat.EmployeeManagementPortal.response;
 
-import com.rajat.EmployeeManagementPortal.model.Manager;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class ProjectListResponse {
 
-    private Long id;
-    private String projectName;
-    private Long managerId;
-    private String managerName;
+  private Long id;
+  private String projectName;
+  private Long managerId;
+  private String managerName;
 
 }

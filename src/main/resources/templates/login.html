@@ -7,23 +7,23 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
 </head>
 <body>
-    <div class="d-flex justify-content-center align-items-center py-4 vh=100">
-        <form id="userDetails" class="w-50" th:action="@{/auth/signin}" method="post">
+<div class="d-flex justify-content-center align-items-center py-4 vh=100">
+    <form id="userDetails" class="w-50" th:action="@{/auth/signin}" method="post">
 
-            <h1 class="mb-4">Login</h1>
+        <h1 class="mb-4">Login</h1>
 
-            <div class="form-floating mb-4">
-                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
-                <label for="email">Email address</label>
-            </div>
+        <div class="form-floating mb-4">
+            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
+            <label for="email">Email address</label>
+        </div>
 
-            <div class="form-floating mb-4">
-                <input type="password" class="form-control" id="password" name="password" placeholder="password">
-                <label for="password">Password</label>
-            </div>
+        <div class="form-floating mb-4">
+            <input type="password" class="form-control" id="password" name="password" placeholder="password">
+            <label for="password">Password</label>
+        </div>
 
-            <button class="btn btn-primary w-50" type="submit">Sign in</button>
-        </form>
-    </div>
+        <button class="btn btn-primary w-50" type="submit">Sign in</button>
+    </form>
+</div>
 </body>
 </html>

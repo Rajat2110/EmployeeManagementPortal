@@ -1,6 +1,12 @@
 package com.rajat.EmployeeManagementPortal.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,16 +21,16 @@ import java.util.List;
 @NoArgsConstructor
 public class Project {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String projectName;
+  private String projectName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Manager manager;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Manager manager;
 
-    @OneToMany(mappedBy = "project")
-    private List<Employee> employees;
+  @OneToMany(mappedBy = "project")
+  private List<Employee> employees;
 
 }

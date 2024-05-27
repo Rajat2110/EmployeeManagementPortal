@@ -15,92 +15,103 @@ import com.rajat.EmployeeManagementPortal.response.ProfileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
+  @Autowired
+  private EmployeeRepository employeeRepository;
 
-    @Autowired
-    private ManagerRepository managerRepository;
+  @Autowired
+  private ManagerRepository managerRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtService jwtService;
+  @Autowired
+  private JwtService jwtService;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+  @Autowired
+  private AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .name(request.getName())
-                .contact(request.getContact())
-                .gender(request.getGender())
-                .dateOfBirth(request.getDateOfBirth())
-                .role(request.getRole())
-                .build();
+  public AuthenticationResponse register(RegisterRequest request) {
+    var user = User.builder()
+      .email(request.getEmail())
+      .password(passwordEncoder.encode(request.getPassword()))
+      .name(request.getName())
+      .contact(request.getContact())
+      .gender(request.getGender())
+      .dateOfBirth(request.getDateOfBirth())
+      .role(request.getRole())
+      .build();
 
-        var savedUser = userRepository.save(user);
+    var savedUser = userRepository.save(user);
 
-        if(user.getRole()== USER_ROLE.MANAGER){
-            Manager manager = new Manager();
-            manager.setUser(user);
-            managerRepository.save(manager);
-        } else if (user.getRole()==USER_ROLE.EMPLOYEE) {
-            Employee employee = new Employee();
-            employee.setUser(user);
-            employeeRepository.save(employee);
-        }
-
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
-                .jwt(jwtToken)
-                .role(savedUser.getRole())
-                .build();
+    if (user.getRole() == USER_ROLE.MANAGER) {
+      Manager manager = new Manager();
+      manager.setUser(user);
+      managerRepository.save(manager);
+    } else if (user.getRole() == USER_ROLE.EMPLOYEE) {
+      Employee employee = new Employee();
+      employee.setUser(user);
+      employeeRepository.save(employee);
     }
 
-    public AuthenticationResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
-                .jwt(jwtToken)
-                .role(user.getRole())
-                .build();
-    }
+    var jwtToken = jwtService.generateToken(user);
+    return AuthenticationResponse.builder()
+      .jwt(jwtToken)
+      .role(savedUser.getRole())
+      .build();
+  }
 
-    public ProfileResponse userProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+  public AuthenticationResponse login(LoginRequest request) {
+    try {
+      authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+          request.getEmail(),
+          request.getPassword()
+        )
+      );
 
-        return ProfileResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .contact(user.getContact())
-                .gender(user.getGender())
-                .role(user.getRole())
-                .build();
+      var user = userRepository.findByEmail(request.getEmail())
+        .orElseThrow();
+      var jwtToken = jwtService.generateToken(user);
+      return AuthenticationResponse.builder()
+        .jwt(jwtToken)
+        .role(user.getRole())
+        .build();
+    } catch (AuthenticationException e) {
+      throw new BadCredentialsException("Invalid email or password");
+
+    } catch (NoSuchElementException e) {
+      throw new RuntimeException("No user found");
     }
+  }
+
+  public ProfileResponse userProfile() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    User user = (User) authentication.getPrincipal();
+
+    return ProfileResponse.builder()
+      .email(user.getEmail())
+      .name(user.getName())
+      .contact(user.getContact())
+      .gender(user.getGender())
+      .role(user.getRole())
+      .build();
+  }
 }
 

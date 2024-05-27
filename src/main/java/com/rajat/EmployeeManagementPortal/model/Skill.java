@@ -16,9 +16,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Skill {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long skillID;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long skillID;
 
-    private String skillName;
+  private String skillName;
 }

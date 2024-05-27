@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class CreateProjectRequest {
-    private String projectName;
-    private Long managerId;
+  private String projectName;
+  private Long managerId;
 }
