@@ -8,7 +8,7 @@ import com.rajat.EmployeeManagementPortal.model.User;
 import com.rajat.EmployeeManagementPortal.repository.RequestRepository;
 import com.rajat.EmployeeManagementPortal.repository.SkillRepository;
 import com.rajat.EmployeeManagementPortal.repository.UserRepository;
-import com.rajat.EmployeeManagementPortal.response.UserListResponse;
+import com.rajat.EmployeeManagementPortal.response.AdminUserListResponse;
 import com.rajat.EmployeeManagementPortal.service.AdminService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +45,16 @@ class AdminServiceTest {
   @BeforeEach
   void setUp() {
     autoCloseable = MockitoAnnotations.openMocks(this);
-    user = new User(Long.parseLong("1"), "abc@gmail.com", "1234", "John", 9876543210L, 'M', "12-12-1994", USER_ROLE.EMPLOYEE);
+    user = User.builder()
+      .userId(Long.parseLong("1"))
+      .email("abc@gmail.com")
+      .password("1234")
+      .name("John")
+      .contact(9876543210L)
+      .gender('M')
+      .dateOfBirth("12-12-1994")
+      .role(USER_ROLE.EMPLOYEE)
+      .build();
   }
 
   @AfterEach
@@ -60,7 +69,7 @@ class AdminServiceTest {
 
     when(userRepository.findAll()).thenReturn(users);
 
-    List<UserListResponse> userList = adminService.viewAll();
+    List<AdminUserListResponse> userList = adminService.viewAll();
 
     assertEquals(1, userList.size());
     assertEquals("abc@gmail.com", userList.get(0).getEmail());
@@ -113,11 +122,11 @@ class AdminServiceTest {
   @Test
   void testAddNewSkill() {
     Skill skill = new Skill();
-    skill.setSkillName("SQL");
+    String newSkill = "SQL";
 
     when(skillRepository.save(any(Skill.class))).thenReturn(skill);
 
-    String response = adminService.addNewSkill(skill);
+    String response = adminService.addNewSkill(newSkill);
 
     assertEquals("Added new skill to the list", response);
   }

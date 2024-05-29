@@ -68,9 +68,10 @@ class ProjectServiceTest {
   }
 
   @Test
-  void createProject() {
-    Manager manager = new Manager();
-    manager.setUserId(101L);
+  void createProjectTest() {
+    Manager manager = Manager.builder()
+      .userId(101L)
+      .build();
 
     Mockito.when(projectRepository.save(project)).thenReturn(project);
     Mockito.when(managerRepository.findById(101L)).thenReturn(Optional.of(manager));
@@ -82,8 +83,9 @@ class ProjectServiceTest {
 
   @Test
   void assignProject() {
-    Employee employee = new Employee();
-    employee.setUserId(1L);
+    Employee employee = Employee.builder()
+      .userId(1L)
+      .build();
 
     Mockito.when(projectRepository.findByProjectName("ERP Software")).thenReturn(Optional.of(project));
     Mockito.when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
