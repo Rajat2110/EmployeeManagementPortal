@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,8 +23,10 @@ public class EmployeeSkill {
   private Long id;
 
   @ManyToOne
+  @JoinColumn(name = "userId")
   private Employee employee;
 
   @ManyToOne
+  @JoinColumn(name = "skillID")
   private Skill skill;
 }

@@ -104,6 +104,7 @@ public class EmployeeService {
     return ProfileResponse.builder()
       .email(user.getEmail())
       .name(user.getName())
+      .contact(user.getContact())
       .gender(user.getGender())
       .dateOfBirth(user.getDateOfBirth())
       .role(user.getRole())

@@ -7,9 +7,11 @@ import com.rajat.EmployeeManagementPortal.model.User;
 import com.rajat.EmployeeManagementPortal.repository.RequestRepository;
 import com.rajat.EmployeeManagementPortal.repository.SkillRepository;
 import com.rajat.EmployeeManagementPortal.repository.UserRepository;
+import com.rajat.EmployeeManagementPortal.response.AdminUserListResponse;
 import com.rajat.EmployeeManagementPortal.response.UserListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +30,15 @@ public class AdminService {
   @Autowired
   private SkillRepository skillRepository;
 
-  public List<UserListResponse> viewAll() {
+  public List<AdminUserListResponse> viewAll() {
 
     try {
       List<User> userList = userRepository.findAll();
-      List<UserListResponse> usersToDisplay = new ArrayList<>();
+      List<AdminUserListResponse> usersToDisplay = new ArrayList<>();
 
       for (User user : userList) {
-        UserListResponse userOutput = UserListResponse.builder()
+        AdminUserListResponse userOutput = AdminUserListResponse.builder()
+          .userId(user.getUserId())
           .email(user.getEmail())
           .name(user.getName())
           .contact(user.getContact())
@@ -51,24 +54,21 @@ public class AdminService {
     }
   }
 
-  public String updateEmployee(Long id, User details) {
-    try {
-      Optional<User> optionalUser = userRepository.findByUserId(id);
-      User updateUser = optionalUser.get();
+  public String updateEmployee(User details) {
+    User foundUser = userRepository.findByUserId(details.getUserId())
+      .orElseThrow(() -> new NoSuchElementException("No user found with this id"));
 
-      updateUser.setEmail(details.getEmail());
-      updateUser.setName(details.getName());
-      updateUser.setContact(details.getContact());
-      updateUser.setRole(details.getRole());
+    foundUser.setEmail(details.getEmail());
+    foundUser.setName(details.getName());
+    foundUser.setContact(details.getContact());
+    foundUser.setRole(details.getRole());
 
-      userRepository.save(updateUser);
+    userRepository.save(foundUser);
 
-      return "Updated employee details successfully.";
-    } catch (NoSuchElementException e) {
-      throw new NoSuchElementException("User not found with this id");
-    }
+    return "Updated employee details successfully.";
   }
 
+  @Transactional
   public String deleteEmployee(Long id) {
     try {
       userRepository.deleteByUserId(id);
@@ -101,14 +101,22 @@ public class AdminService {
     }
   }
 
-  public String addNewSkill(Skill skill) {
+  public String addNewSkill(String skill) {
     try {
       var newSkill = Skill.builder()
-        .skillName(skill.getSkillName())
+        .skillName(skill)
         .build();
 
       skillRepository.save(newSkill);
       return "Added new skill to the list";
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public List<Skill> allSkills() {
+    try {
+      return skillRepository.findAll();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

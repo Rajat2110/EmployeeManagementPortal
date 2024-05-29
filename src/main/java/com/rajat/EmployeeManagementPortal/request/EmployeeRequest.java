@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EmployeeRequest {
 
+  private Long id;
+
   private String skillName;
 
   private int numOfEmployees;

@@ -7,6 +7,7 @@ import com.rajat.EmployeeManagementPortal.response.ProjectListResponse;
 import com.rajat.EmployeeManagementPortal.response.UserListResponse;
 import com.rajat.EmployeeManagementPortal.service.ManagerService;
 import com.rajat.EmployeeManagementPortal.service.ProjectService;
+import jakarta.persistence.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

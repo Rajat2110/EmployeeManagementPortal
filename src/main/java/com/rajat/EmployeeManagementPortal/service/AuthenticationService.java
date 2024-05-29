@@ -48,7 +48,7 @@ public class AuthenticationService {
   private AuthenticationManager authenticationManager;
 
   public AuthenticationResponse register(RegisterRequest request) {
-    var user = User.builder()
+    var newUser = User.builder()
       .email(request.getEmail())
       .password(passwordEncoder.encode(request.getPassword()))
       .name(request.getName())
@@ -58,19 +58,21 @@ public class AuthenticationService {
       .role(request.getRole())
       .build();
 
-    var savedUser = userRepository.save(user);
+    var savedUser = userRepository.save(newUser);
 
-    if (user.getRole() == USER_ROLE.MANAGER) {
-      Manager manager = new Manager();
-      manager.setUser(user);
+    if (newUser.getRole() == USER_ROLE.MANAGER) {
+      Manager manager = Manager.builder()
+        .user(newUser)
+        .build();
       managerRepository.save(manager);
-    } else if (user.getRole() == USER_ROLE.EMPLOYEE) {
-      Employee employee = new Employee();
-      employee.setUser(user);
+    } else if (newUser.getRole() == USER_ROLE.EMPLOYEE) {
+      Employee employee = Employee.builder()
+        .user(newUser)
+        .build();
       employeeRepository.save(employee);
     }
 
-    var jwtToken = jwtService.generateToken(user);
+    var jwtToken = jwtService.generateToken(newUser);
     return AuthenticationResponse.builder()
       .jwt(jwtToken)
       .role(savedUser.getRole())

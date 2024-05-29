@@ -1,5 +1,6 @@
 package com.rajat.EmployeeManagementPortal.response;
 
+import com.rajat.EmployeeManagementPortal.model.Skill;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,9 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeListResponse {
-  private Long id;
+  private Long userId;
   private String name;
-  private Long contact;
-  private List<String> skills;
+  private String[] skills;
   private String project;
 }

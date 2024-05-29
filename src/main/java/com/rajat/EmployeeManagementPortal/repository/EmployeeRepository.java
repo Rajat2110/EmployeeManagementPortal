@@ -10,9 +10,10 @@ import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
-  @Query("SELECT e FROM Employee e WHERE e.project is null")
+  @Query("SELECT e FROM Employee e WHERE e.project.id is null")
   Optional<List<Employee>> findUnassignedEmployees();
 
-  @Query("SELECT new com.rajat.EmployeeManagementPortal.response.EmployeeListResponse(e.id, e.user.name, e.user.contact, e.skills, e.project.projectName) FROM Employee e")
-  List<EmployeeListResponse> findAllEmployees();
+  @Query(nativeQuery = true)
+  List<EmployeeListResponse> findAllEmployeeDetails();
+
 }

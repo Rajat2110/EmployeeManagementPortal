@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ManagerService {
@@ -44,6 +45,9 @@ public class ManagerService {
       UserListResponse userOutput = UserListResponse.builder()
         .email(user.getEmail())
         .name(user.getName())
+        .contact(user.getContact())
+        .gender(user.getGender())
+        .dateOfBirth(user.getDateOfBirth())
         .role(user.getRole())
         .build();
       usersToDisplay.add(userOutput);
@@ -53,9 +57,13 @@ public class ManagerService {
 
   public String requestEmployee(EmployeeRequest request) {
     try {
+      User user = userRepository.findByUserId(request.getId())
+        .orElseThrow(() -> new NoSuchElementException("No user found with provided id"));
+      String name = user.getName();
+
       Request employeeRequest = Request.builder()
         .skill(request.getSkillName())
-//                    .requestedBy()
+        .requestedBy(name)
         .employeesRequired(request.getNumOfEmployees())
         .status(request.getStatus())
         .build();
@@ -79,7 +87,6 @@ public class ManagerService {
   }
 
   public List<EmployeeListResponse> getAllEmployees() {
-    List<EmployeeListResponse> employees = employeeRepository.findAllEmployees();
-    return employees;
+    return employeeRepository.findAllEmployeeDetails();
   }
 }

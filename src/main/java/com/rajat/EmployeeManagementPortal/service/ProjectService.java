@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ProjectService {
@@ -42,13 +43,22 @@ public class ProjectService {
   }
 
   public String assignProject(Long empId, String projectName) {
-    Project project = projectRepository.findByProjectName(projectName).get();
+    Project project = projectRepository.findByProjectName(projectName)
+      .orElseThrow(() -> new NoSuchElementException("No project found with this name"));
 
-    Employee emp = employeeRepository.findById(empId).get();
+    Employee emp = employeeRepository.findById(empId)
+        .orElseThrow(() -> new NoSuchElementException("No employee found with this id"));
 
     emp.setProject(project);
     employeeRepository.save(emp);
     return "Project assigned to the employee";
   }
 
+  public String unassignProject(Long empId, String projectName) {
+    Employee emp = employeeRepository.findById(empId)
+      .orElseThrow(() -> new NoSuchElementException("No employee found with this id"));
+    
+    emp.setProject(null);
+    return "Unassigned Employee from the project successfully";
+  }
 }
