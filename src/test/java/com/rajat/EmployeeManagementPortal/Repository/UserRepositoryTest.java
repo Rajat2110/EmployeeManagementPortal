@@ -21,10 +21,10 @@ public class UserRepositoryTest {
   private UserRepository userRepository;
 
   @Test
-  public void saveUserTest() {
+  public void testSaveUser() {
     User user = User.builder()
       .email("abc@gmail.com")
-      .password("1234")
+      .password("password")
       .name("abc")
       .contact(9039567890L)
       .gender('F')
@@ -38,10 +38,10 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void getUserByEmailTest() {
+  public void testGetUserByEmail() {
     User user = User.builder()
       .email("abc@gmail.com")
-      .password("1234")
+      .password("password")
       .name("abc")
       .contact(9039567890L)
       .role(USER_ROLE.EMPLOYEE)
@@ -55,10 +55,10 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void findAllUsersTest() {
+  public void testFindAllUsers() {
     User user = User.builder()
       .email("abc@gmail.com")
-      .password("1234")
+      .password("password")
       .name("abc")
       .contact(9039567890L)
       .role(USER_ROLE.EMPLOYEE)
@@ -66,7 +66,7 @@ public class UserRepositoryTest {
 
     User user2 = User.builder()
       .email("john@gmail.com")
-      .password("qwerty")
+      .password("qwerty123")
       .name("john")
       .contact(9039512390L)
       .role(USER_ROLE.MANAGER)
@@ -82,10 +82,10 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void updateUserTest() {
+  public void testUpdateUser() {
     User user = User.builder()
       .email("abc@gmail.com")
-      .password("1234")
+      .password("password")
       .name("abc")
       .gender('F')
       .contact(9039567890L)
@@ -100,23 +100,23 @@ public class UserRepositoryTest {
 
     User updatedUser = userRepository.save(savedUser);
 
-    Assertions.assertThat(updatedUser.getName()).isNotNull();
+    Assertions.assertThat(updatedUser.getName()).isEqualTo("Adam");
     Assertions.assertThat(updatedUser.getContact()).isNotNull();
   }
 
   @Test
-  public void deleteUserTest() {
+  public void testDeleteUser() {
     User user = User.builder()
       .userId(101L)
       .email("abc@gmail.com")
-      .password("1234")
+      .password("password")
       .name("abc")
       .contact(9039567890L)
       .role(USER_ROLE.EMPLOYEE)
       .build();
 
-    userRepository.save(user);
-    userRepository.deleteByUserId(user.getUserId());
+    User savedUser = userRepository.saveAndFlush(user);
+    userRepository.deleteByUserId(savedUser.getUserId());
 
     Optional<User> returnedUser = userRepository.findByEmail(user.getEmail());
 

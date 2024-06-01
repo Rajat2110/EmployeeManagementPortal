@@ -1,17 +1,28 @@
 package com.rajat.EmployeeManagementPortal.Repository;
 
 import com.rajat.EmployeeManagementPortal.model.Employee;
+import com.rajat.EmployeeManagementPortal.model.EmployeeSkill;
+import com.rajat.EmployeeManagementPortal.model.Employee;
+import com.rajat.EmployeeManagementPortal.model.Manager;
 import com.rajat.EmployeeManagementPortal.model.Project;
+import com.rajat.EmployeeManagementPortal.model.Skill;
+import com.rajat.EmployeeManagementPortal.model.USER_ROLE;
+import com.rajat.EmployeeManagementPortal.model.User;
 import com.rajat.EmployeeManagementPortal.repository.EmployeeRepository;
+import com.rajat.EmployeeManagementPortal.repository.EmployeeSkillRepository;
+import com.rajat.EmployeeManagementPortal.repository.ProjectRepository;
+import com.rajat.EmployeeManagementPortal.repository.SkillRepository;
+import com.rajat.EmployeeManagementPortal.repository.UserRepository;
+import com.rajat.EmployeeManagementPortal.response.EmployeeListResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.security.core.userdetails.User;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,32 +34,66 @@ class EmployeeRepositoryTest {
   @Autowired
   private EmployeeRepository employeeRepository;
 
+  @Autowired
+  private UserRepository userRepository;
+
   @Test
-  void findUnassignedEmployeesTest() {
-    com.rajat.EmployeeManagementPortal.model.User user1 = com.rajat.EmployeeManagementPortal.model.User.builder()
-      .userId(101L)
-      .build();
+  void testSaveEmployee() {
+    User user = new User();
+    user.setEmail("abc@example.com");
+    user.setPassword("password");
+    user.setRole(USER_ROLE.EMPLOYEE);
+    User savedUser = userRepository.save(user);
 
-    com.rajat.EmployeeManagementPortal.model.User user2 = com.rajat.EmployeeManagementPortal.model.User.builder()
-      .userId(102L)
-      .build();
+    Employee employee = new Employee();
+    employee.setUserId(savedUser.getUserId());
+    employee.setUser(savedUser);
+    savedUser.setEmployee(employee);
 
-    Employee emp1 = Employee.builder()
-      .userId(101L)
-      .user(user1)
-      .build();
+    Employee savedEmployee = employeeRepository.save(employee);
 
-    Employee emp2 = Employee.builder()
-      .userId(102L)
-      .user(user2)
-      .project(Project.builder().projectName("Quiz Application").build())
-      .build();
-
-    employeeRepository.save(emp1);
-    employeeRepository.save(emp2);
-    List<Employee> unassignedEmployees = employeeRepository.findUnassignedEmployees().get();
-
-    assertThat(unassignedEmployees).isNotNull();
-    assertThat(unassignedEmployees.size()).isEqualTo(1);
+    assertThat(savedEmployee).isNotNull();
+    assertEquals("abc@example.com", savedEmployee.getUser().getEmail());
+    assertEquals(USER_ROLE.EMPLOYEE, savedEmployee.getUser().getRole());
   }
+
+  @Test
+  void testDeleteEmployee() {
+    User user = new User();
+    user.setEmail("abc@example.com");
+    user.setPassword("password");
+    user.setRole(USER_ROLE.EMPLOYEE);
+    User savedUser = userRepository.save(user);
+
+    Employee employee = new Employee();
+    employee.setUserId(savedUser.getUserId());
+    employee.setUser(savedUser);
+    savedUser.setEmployee(employee);
+
+    employeeRepository.save(employee);
+    employeeRepository.deleteById(employee.getUserId());
+
+    Optional<Employee> deletedEmployee = employeeRepository.findById(1L);
+
+    assertThat(deletedEmployee).isEmpty();
+  }
+
+  @Test
+  void testEmployeeNotFound() {
+    User user = new User();
+    user.setEmail("abc@example.com");
+    user.setPassword("password");
+    user.setRole(USER_ROLE.EMPLOYEE);
+    User savedUser = userRepository.save(user);
+
+    Employee employee = new Employee();
+    employee.setUserId(savedUser.getUserId());
+    employee.setUser(savedUser);
+    savedUser.setEmployee(employee);
+    employeeRepository.save(employee);
+
+    Optional<Employee> foundEmployee = employeeRepository.findById(999L);
+    assertFalse(foundEmployee.isPresent());
+  }
+
 }

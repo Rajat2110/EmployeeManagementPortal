@@ -8,8 +8,10 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -20,7 +22,7 @@ public class RequestRepositoryTest {
   private RequestRepository requestRepository;
 
   @Test
-  void saveRequestTest() {
+  void testSaveRequest() {
     Request request = Request.builder()
       .skill("Java")
       .employeesRequired(3)
@@ -33,7 +35,7 @@ public class RequestRepositoryTest {
   }
 
   @Test
-  void findAllRequestTest() {
+  void testFindAllRequest() {
 
     Request request1 = Request.builder()
       .skill("Java")
@@ -53,4 +55,25 @@ public class RequestRepositoryTest {
     assertThat(requests).isNotNull();
     assertThat(requests.size()).isEqualTo(2);
   }
+
+  @Test
+  void testFindByRequestedBy() {
+    Request request = Request.builder()
+      .skill("Java")
+      .employeesRequired(3)
+      .requestedBy("John")
+      .build();
+
+    requestRepository.save(request);
+
+    List<Request> requests = new ArrayList<>();
+    requests.add(request);
+
+    List<Request> response = requestRepository.findByRequestedBy("John");
+
+    assertThat(response).isNotNull();
+    assertThat(response.size()).isEqualTo(1);
+    assertThat(response.get(0).getSkill()).isEqualTo(request.getSkill());
+  }
+
 }

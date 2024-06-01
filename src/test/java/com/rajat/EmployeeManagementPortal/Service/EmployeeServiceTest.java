@@ -107,15 +107,12 @@ class EmployeeServiceTest {
 
   @Test
   void testViewAllEmployees() {
-    //Arrange
     List<User> users = new ArrayList<>();
     users.add(user);
 
-    //Act
     when(userRepository.findAll()).thenReturn(users);
     List<UserListResponse> userList = employeeService.viewAllEmployees();
 
-    //Assert
     assertEquals(1, userList.size());
     assertEquals("John", userList.get(0).getName());
   }
@@ -146,7 +143,7 @@ class EmployeeServiceTest {
   }
 
   @Test
-  void testSkillsList() {
+  void testGetSkillList() {
     List<Skill> skills = new ArrayList<>();
     skills.add(skill);
 
@@ -158,7 +155,7 @@ class EmployeeServiceTest {
   }
 
   @Test
-  void addSkill() {
+  void testAddSkill() {
     String newSkill = "Java";
 
     when(authentication.getPrincipal()).thenReturn(user);
@@ -173,7 +170,7 @@ class EmployeeServiceTest {
   }
 
   @Test
-  void getProfile() {
+  void testGetProfile() {
     List<String> skills = Arrays.asList("Java", "Spring");
 
     when(authentication.getPrincipal()).thenReturn(user);

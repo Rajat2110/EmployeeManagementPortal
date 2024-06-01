@@ -4,7 +4,9 @@ import com.rajat.EmployeeManagementPortal.model.Manager;
 import com.rajat.EmployeeManagementPortal.model.Project;
 import com.rajat.EmployeeManagementPortal.model.USER_ROLE;
 import com.rajat.EmployeeManagementPortal.model.User;
+import com.rajat.EmployeeManagementPortal.repository.ManagerRepository;
 import com.rajat.EmployeeManagementPortal.repository.ProjectRepository;
+import com.rajat.EmployeeManagementPortal.repository.UserRepository;
 import com.rajat.EmployeeManagementPortal.response.ProjectListResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,8 +26,14 @@ public class ProjectRepositoryTest {
   @Autowired
   private ProjectRepository projectRepository;
 
+  @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
+  private ManagerRepository managerRepository;
+
   @Test
-  public void saveProjectTest() {
+  public void testSaveProject() {
     Project project = Project.builder()
       .projectName("Quiz Application")
       .build();
@@ -36,7 +44,7 @@ public class ProjectRepositoryTest {
   }
 
   @Test
-  public void findProjectByNameTest() {
+  public void testFindProjectByName() {
     Project project = Project.builder()
       .projectName("Quiz Application")
       .build();
@@ -49,7 +57,7 @@ public class ProjectRepositoryTest {
   }
 
   @Test
-  public void findAllProjectsTest() {
+  public void testFindAllProjects() {
     Project project1 = Project.builder()
       .projectName("Quiz Application")
       .build();
@@ -67,29 +75,32 @@ public class ProjectRepositoryTest {
   }
 
   @Test
-  public void findAllProjectDetailsTest() {
+  public void testFindAllProjectDetails() {
     User user = User.builder()
-      .userId(101L)
-      .name("John")
+      .email("abc@example.com")
+      .password("password")
       .role(USER_ROLE.MANAGER)
       .build();
+    User savedUser = userRepository.save(user);
 
     Manager manager = Manager.builder()
-      .userId(101L)
-      .user(user)
+      .user(savedUser)
       .build();
+    Manager savedManager = managerRepository.save(manager);
 
     Project project1 = Project.builder()
       .id(1L)
       .projectName("Quiz Application")
-      .manager(manager)
+      .manager(savedManager)
       .build();
 
     Project project2 = Project.builder()
       .id(2L)
       .projectName("ML Project")
-      .manager(manager)
       .build();
+
+    projectRepository.save(project1);
+    projectRepository.save(project2);
 
     List<ProjectListResponse> projects = projectRepository.findAllProjectDetails();
     System.out.println(projects);
