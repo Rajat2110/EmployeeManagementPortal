@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthenticationResponse {
 
-  private String jwt;
-  private USER_ROLE role;
+    private String jwt;
+    private USER_ROLE role;
 }

@@ -1,5 +1,6 @@
 package com.rajat.EmployeeManagementPortal.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -24,14 +25,15 @@ import java.util.List;
 @Table(name = "manager")
 public class Manager {
 
-  @Id
-  private Long userId;
+    @Id
+    private Long userId;
 
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "userId")
-  private User user;
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "userId")
+    @JsonIgnore
+    private User user;
 
-  @OneToMany(mappedBy = "manager")
-  private List<Project> projects;
+    @OneToMany(mappedBy = "manager")
+    private List<Project> projects;
 }

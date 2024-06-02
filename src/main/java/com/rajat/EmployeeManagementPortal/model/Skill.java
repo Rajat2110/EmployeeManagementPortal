@@ -1,11 +1,11 @@
 package com.rajat.EmployeeManagementPortal.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,12 +21,13 @@ import java.util.List;
 @NoArgsConstructor
 public class Skill {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long skillID;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long skillID;
 
-  private String skillName;
+    private String skillName;
 
-  @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<EmployeeSkill> employeeSkills;
+    @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<EmployeeSkill> employeeSkills;
 }

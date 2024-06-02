@@ -18,15 +18,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmployeeSkill {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "userId")
-  private Employee employee;
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private Employee employee;
 
-  @ManyToOne
-  @JoinColumn(name = "skillID")
-  private Skill skill;
+    @ManyToOne
+    @JoinColumn(name = "skillID")
+    private Skill skill;
 }

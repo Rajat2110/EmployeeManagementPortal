@@ -8,9 +8,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,58 +35,70 @@ import java.util.List;
 @Table(name = "\"user\"")
 public class User implements UserDetails {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long userId;
-  @Column(unique = true)
-  private String email;
-  private String password;
-  private String name;
-  private Long contact;
-  private Character gender;
-  private String dateOfBirth;
-  @Enumerated(EnumType.STRING)
-  private USER_ROLE role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Employee employee;
+    @Column(unique = true)
+    @NotBlank(message = "Email is mandatory")
+    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}", flags = Pattern.Flag.CASE_INSENSITIVE)
+    private String email;
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Manager manager;
+    @NotBlank(message = "Password is mandatory")
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    private String password;
 
-  @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority(role.name()));
-  }
+    private String name;
 
-  @Override
-  public String getPassword() {
-    return password;
-  }
+    @Digits(integer = 10, fraction = 0, message = "Contact should not be more than 10 digits")
+    private Long contact;
 
-  @Override
-  public String getUsername() {
-    return email;
-  }
+    private Character gender;
 
-  @Override
-  public boolean isAccountNonExpired() {
-    return true;
-  }
+    private LocalDate dateOfBirth;
 
-  @Override
-  public boolean isAccountNonLocked() {
-    return true;
-  }
+    @Enumerated(EnumType.STRING)
+    private USER_ROLE role;
 
-  @Override
-  public boolean isCredentialsNonExpired() {
-    return true;
-  }
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Employee employee;
 
-  @Override
-  public boolean isEnabled() {
-    return true;
-  }
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Manager manager;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
 }

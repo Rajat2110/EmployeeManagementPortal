@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EmployeeRequest {
 
-  private Long id;
+    private Long id;
 
-  private String skillName;
+    private String skillName;
 
-  private int numOfEmployees;
+    private int numOfEmployees;
 
-  private STATUS status = STATUS.PENDING;
+    private STATUS status = STATUS.PENDING;
 }

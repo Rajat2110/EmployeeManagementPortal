@@ -22,95 +22,133 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service class for employee operations
+ */
 @Service
 public class EmployeeService {
 
-  @Autowired
-  private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-  @Autowired
-  private EmployeeRepository employeeRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
-  @Autowired
-  private SkillRepository skillRepository;
+    @Autowired
+    private SkillRepository skillRepository;
 
-  @Autowired
-  private EmployeeSkillRepository employeeSkillRepository;
+    @Autowired
+    private EmployeeSkillRepository employeeSkillRepository;
 
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-  public List<UserListResponse> viewAllEmployees() {
+    /**
+     * Retrieves a list of all employees
+     * @return List of employees in UserListResponse format
+     */
+    public List<UserListResponse> viewAllEmployees() {
 
-    List<User> userList = userRepository.findAll();
-    List<UserListResponse> usersToDisplay = new ArrayList<>();
+        List<User> userList = userRepository.findAll();
+        List<UserListResponse> usersToDisplay = new ArrayList<>();
 
-    for (User user : userList) {
-      UserListResponse userOutput = UserListResponse.builder()
-        .email(user.getEmail())
-        .name(user.getName())
-        .role(user.getRole())
-        .build();
-      usersToDisplay.add(userOutput);
+        for (User user : userList) {
+            UserListResponse userOutput = UserListResponse.builder()
+                    .email(user.getEmail())
+                    .name(user.getName())
+                    .role(user.getRole())
+                    .build();
+            usersToDisplay.add(userOutput);
+        }
+        return usersToDisplay;
     }
-    return usersToDisplay;
-  }
 
-  public String changePassword(ChangePasswordRequest request) throws Exception {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    User user = (User) authentication.getPrincipal();
+    /**
+     * Returns the profile of an employee
+     * @return Profile in the ProfileResponse format
+     */
+    public ProfileResponse getProfile() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-    if (request.getNewPassword().length() < 8) {
-      throw new IllegalArgumentException("Password must be at least 8 characters");
+        Employee emp = employeeRepository.findById(user.getUserId()).get();
+        Project project = emp.getProject();
+
+        List<String> skillList =
+                employeeSkillRepository.findSkillsById(user.getUserId());
+
+        return ProfileResponse.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .contact(user.getContact())
+                .gender(user.getGender())
+                .dateOfBirth(user.getDateOfBirth())
+                .role(user.getRole())
+                .projectName(project != null ? project.getProjectName() : null)
+                .skills(skillList)
+                .build();
     }
-    if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-      user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-      userRepository.save(user);
-      return "Password changed successfully";
-    } else {
-      throw new BadCredentialsException("Password doesn't match with existing password!");
+
+    /**
+     * Changes the password for an employee
+     * @param request Request containing current and new password fields
+     * @return Success message upon successful password change
+     * @throws Exception When the current password does not match with the one in the request
+     */
+    public String changePassword(ChangePasswordRequest request)
+            throws Exception {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        if (request.getNewPassword().length() < 8) {
+            throw new IllegalArgumentException(
+                    "Password must be at least 8 characters");
+        }
+        if (passwordEncoder.matches(request.getPassword(),
+                user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
+            return "Password changed successfully";
+        } else {
+            throw new BadCredentialsException(
+                    "Password doesn't match with existing password!");
+        }
     }
-  }
 
-  public List<Skill> skillsList() {
-    return skillRepository.findAll();
-  }
+    /**
+     * Retrieves the list of available skills
+     * @return The list of skills
+     */
+    public List<Skill> skillsList() {
+        return skillRepository.findAll();
+    }
 
-  public String addSkill(String newSkill) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    User user = (User) authentication.getPrincipal();
+    /**
+     * Adds a new skill to the employee's skillset
+     * @param skill The name of the skill to be added
+     * @return Success message upon successful skill addition
+     */
+    public String addSkill(String skill) {
+        try {
+            Authentication authentication =
+                    SecurityContextHolder.getContext().getAuthentication();
+            User user = (User) authentication.getPrincipal();
 
-    Employee emp = employeeRepository.findById(user.getUserId()).get();
-    Skill skill = skillRepository.findBySkillName(newSkill);
+            Employee emp = employeeRepository.findById(user.getUserId()).get();
+            Skill foundSkill = skillRepository.findBySkillName(skill);
 
-    var empSkill = EmployeeSkill.builder()
-      .employee(emp)
-      .skill(skill)
-      .build();
+            var empSkill = EmployeeSkill.builder()
+                    .employee(emp)
+                    .skill(foundSkill)
+                    .build();
 
-    employeeSkillRepository.save(empSkill);
-    return "Added new skill successfully";
-  }
-
-  public ProfileResponse getProfile() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    User user = (User) authentication.getPrincipal();
-
-    Employee emp = employeeRepository.findById(user.getUserId()).get();
-    Project project = emp.getProject();
-
-    List<String> skillList = employeeSkillRepository.findSkillsById(user.getUserId());
-
-    return ProfileResponse.builder()
-      .email(user.getEmail())
-      .name(user.getName())
-      .contact(user.getContact())
-      .gender(user.getGender())
-      .dateOfBirth(user.getDateOfBirth())
-      .role(user.getRole())
-      .projectName(project.getProjectName())
-      .skills(skillList)
-      .build();
-  }
+            employeeSkillRepository.save(empSkill);
+            return "Added new skill successfully";
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

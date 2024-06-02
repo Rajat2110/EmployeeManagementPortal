@@ -20,16 +20,16 @@ import lombok.NoArgsConstructor;
 @Table(name = "request")
 public class Request {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
-  private String skill;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String skill;
 
-  private int employeesRequired;
+    private int employeesRequired;
 
-  private String requestedBy;
+    private String requestedBy;
 
-  @Enumerated(EnumType.STRING)
-  private STATUS status;
+    @Enumerated(EnumType.STRING)
+    private STATUS status;
 
 }

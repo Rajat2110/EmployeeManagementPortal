@@ -2,6 +2,7 @@ package com.rajat.EmployeeManagementPortal.Config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -26,47 +27,60 @@ import static com.rajat.EmployeeManagementPortal.model.USER_ROLE.MANAGER;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final JwtAuthenticationFilter jwtAuthFilter;
-  private final AuthenticationProvider authenticationProvider;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthFilter;
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-      .csrf(AbstractHttpConfigurer::disable)
-      .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-      .sessionManagement((session) -> session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      )
-      .authorizeHttpRequests((authorize) -> authorize
-        .requestMatchers("/auth/**", "/auth/userProfile", "/css/**", "/js/**").permitAll() //whitelist (no authorization required)
-        .requestMatchers("/admin/**").hasAnyAuthority(ADMIN.name())
-        .requestMatchers("/manager/**").hasAnyAuthority(MANAGER.name())
-        .requestMatchers("/employee/**").hasAnyAuthority(EMPLOYEE.name())
-        .anyRequest().authenticated() //any other requests need to be authenticated
-      )
-      .authenticationProvider(authenticationProvider)
-      .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    @Autowired
+    private AuthenticationProvider authenticationProvider;
 
-    return http.build();
-  }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(
+                        corsConfigurationSource()))
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests((authorize) -> authorize
+                                .requestMatchers("/auth/**", "/auth/userProfile",
+                                        "/css/**", "/js/**")
+                                .permitAll() //whitelist (no authorization required)
+                                .requestMatchers("/admin/**")
+                                .hasAnyAuthority(ADMIN.name())
+                                .requestMatchers("/manager/**")
+                                .hasAnyAuthority(MANAGER.name())
+                                .requestMatchers("/employee/**")
+                                .hasAnyAuthority(EMPLOYEE.name())
+                                .anyRequest().authenticated()
+                        //any other requests need to be authenticated
+                )
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
-  private CorsConfigurationSource corsConfigurationSource() {
-    return new CorsConfigurationSource() {
+        return http.build();
+    }
 
-      @Override
-      public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-        CorsConfiguration cfg = new CorsConfiguration();
+    private CorsConfigurationSource corsConfigurationSource() {
+        return new CorsConfigurationSource() {
 
-        //cors setAllowedOrigins for front-end requests
-        cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        cfg.setAllowedMethods(Collections.singletonList("*"));
-        cfg.setAllowCredentials(true);
-        cfg.setAllowedHeaders(Collections.singletonList("*"));
-        cfg.setExposedHeaders(Arrays.asList("Authorization"));
-        cfg.setMaxAge(3600L);
+            @Override
+            public CorsConfiguration getCorsConfiguration(
+                    HttpServletRequest request) {
+                CorsConfiguration cfg = new CorsConfiguration();
 
-        return cfg;
-      }
-    };
-  }
+                //cors setAllowedOrigins for front-end requests
+                cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+                cfg.setAllowedMethods(Collections.singletonList("*"));
+                cfg.setAllowCredentials(true);
+                cfg.setAllowedHeaders(Collections.singletonList("*"));
+                cfg.setExposedHeaders(Arrays.asList("Authorization"));
+                cfg.setMaxAge(3600L);
+
+                return cfg;
+            }
+        };
+    }
 }
