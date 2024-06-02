@@ -27,6 +27,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,8 +69,9 @@ class AuthenticationServiceTest {
 
   @Test
   void testRegisterUser() {
+    LocalDate date = LocalDate.parse("1998-07-30");
     RegisterRequest request = new RegisterRequest("manager@example.com","password",1234567890L,"Manager",
-      'M',"1999-12-01", USER_ROLE.MANAGER);
+      'M',date, USER_ROLE.MANAGER);
 
     User newUser = User.builder()
       .email(request.getEmail())
@@ -117,7 +120,8 @@ class AuthenticationServiceTest {
 
   @Test
   void userProfile() {
-    User user = User.builder().email("user@example.com").name("User").contact(1234567890L).gender('F').dateOfBirth("1995-05-05").role(USER_ROLE.EMPLOYEE).build();
+    LocalDate date = LocalDate.parse("1998-07-30");
+    User user = User.builder().email("user@example.com").name("User").contact(1234567890L).gender('F').dateOfBirth(date).role(USER_ROLE.EMPLOYEE).build();
     Authentication authentication = mock(Authentication.class);
     SecurityContext securityContext = mock(SecurityContext.class);
 

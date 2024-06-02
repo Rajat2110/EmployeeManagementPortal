@@ -26,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -74,6 +75,7 @@ class ManagerServiceTest {
 
   @Test
   void testViewAll() {
+    LocalDate date = LocalDate.parse("1994-12-12");
     User user = User.builder()
       .userId(Long.parseLong("1"))
       .email("abc@gmail.com")
@@ -81,7 +83,7 @@ class ManagerServiceTest {
       .name("John")
       .contact(9876543210L)
       .gender('M')
-      .dateOfBirth("12-12-1994")
+      .dateOfBirth(date)
       .role(USER_ROLE.EMPLOYEE)
       .build();
 

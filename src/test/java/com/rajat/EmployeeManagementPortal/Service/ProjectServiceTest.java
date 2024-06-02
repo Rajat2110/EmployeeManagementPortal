@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,9 +61,9 @@ class ProjectServiceTest {
 
   @Test
   void testGetAllProjects() throws ParseException {
-    SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+    LocalDate date = LocalDate.parse("1994-12-12");
     List<ProjectListResponse> projects = new ArrayList<>();
-    projects.add(new ProjectListResponse(201L, "Quiz Application", formatter.parse("12-Dec-2023"), 101L, "John"));
+    projects.add(new ProjectListResponse(201L, "Quiz Application", date, 101L, "John"));
 
     Mockito.when(projectRepository.findAllProjectDetails()).thenReturn(projects);
 
@@ -82,8 +83,8 @@ class ProjectServiceTest {
     Mockito.when(projectRepository.save(project)).thenReturn(project);
     Mockito.when(managerRepository.findById(101L)).thenReturn(Optional.of(manager));
 
-    SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
-    CreateProjectRequest request = new CreateProjectRequest("ERP Software", formatter.parse("01-May-2024"), 101L);
+    LocalDate date = LocalDate.parse("1994-12-12");
+    CreateProjectRequest request = new CreateProjectRequest("ERP Software", date, 101L);
     String response = projectService.createProject(request);
 
     assertEquals("Project Created", response);
@@ -113,7 +114,7 @@ class ProjectServiceTest {
     Mockito.when(projectRepository.findByProjectName("ERP Software")).thenReturn(Optional.of(project));
     Mockito.when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
 
-    String result = projectService.unassignProject(1L, "ERP Software");
+    String result = projectService.unassignProject(1L);
 
     assertEquals("Unassigned Employee from the project successfully", result);
   }

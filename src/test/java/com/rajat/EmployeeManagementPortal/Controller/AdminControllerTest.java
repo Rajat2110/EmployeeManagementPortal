@@ -3,7 +3,6 @@ package com.rajat.EmployeeManagementPortal.Controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rajat.EmployeeManagementPortal.Config.JwtService;
 import com.rajat.EmployeeManagementPortal.controller.AdminController;
-import com.rajat.EmployeeManagementPortal.model.Project;
 import com.rajat.EmployeeManagementPortal.model.Request;
 import com.rajat.EmployeeManagementPortal.model.STATUS;
 import com.rajat.EmployeeManagementPortal.model.Skill;
@@ -13,13 +12,10 @@ import com.rajat.EmployeeManagementPortal.request.CreateProjectRequest;
 import com.rajat.EmployeeManagementPortal.response.AdminUserListResponse;
 import com.rajat.EmployeeManagementPortal.response.EmployeeListResponse;
 import com.rajat.EmployeeManagementPortal.response.ProjectListResponse;
-import com.rajat.EmployeeManagementPortal.response.UserListResponse;
 import com.rajat.EmployeeManagementPortal.service.AdminService;
 import com.rajat.EmployeeManagementPortal.service.ProjectService;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -28,20 +24,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.security.Key;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +42,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -77,13 +69,9 @@ class AdminControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
-  private Key key;
-
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
   }
 
   @Test
@@ -106,7 +94,9 @@ class AdminControllerTest {
   @Test
   @WithMockUser(roles = "ADMIN")
   void testViewAll() throws Exception {
-    AdminUserListResponse user = new AdminUserListResponse(1L, "abc@example.com", "John", 9089564636L, 'M', "30/07/1998", USER_ROLE.EMPLOYEE);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    LocalDate date = LocalDate.parse("1998-07-30", formatter);
+    AdminUserListResponse user = new AdminUserListResponse(1L, "abc@example.com", "John", 9089564636L, 'M', date, USER_ROLE.EMPLOYEE);
     List<AdminUserListResponse> employees = new ArrayList<>();
     employees.add(user);
 
@@ -189,7 +179,7 @@ class AdminControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.post("/admin/createProject").with(csrf())
         .contentType(MediaType.APPLICATION_JSON)
         .content(jsonRequest))
-      .andExpect(status().isNotFound())
+      .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.message").value("Manager not found with specified id."));
   }
 
@@ -231,8 +221,8 @@ class AdminControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.put("/admin/assignProject")
         .param("empId", String.valueOf(empId))
         .param("projectName", projectName).with(csrf()))
-      .andExpect(status().isOk())
-      .andExpect(content().string("No employee found with this id"));
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.message").value("No employee found with this id"));
   }
 
   @Test
@@ -241,11 +231,10 @@ class AdminControllerTest {
     Long empId = 1L;
     String projectName = "Test Project";
 
-    when(projectService.unassignProject(empId, projectName)).thenReturn("Unassigned Employee from the project");
+    when(projectService.unassignProject(empId)).thenReturn("Unassigned Employee from the project");
 
     mockMvc.perform(MockMvcRequestBuilders.put("/admin/unassignProject")
-        .param("empId", String.valueOf(empId))
-        .param("projectName", projectName).with(csrf()))
+        .param("empId", String.valueOf(empId)).with(csrf()))
       .andExpect(status().isOk())
       .andExpect(content().string("Unassigned Employee from the project"));
   }
@@ -257,12 +246,14 @@ class AdminControllerTest {
 
     when(adminService.addNewSkill(skill)).thenReturn("Added new skill to the list");
 
-    mockMvc.perform(MockMvcRequestBuilders.post("/admin/newSkill/{skill}", skill).with(csrf()))
+    mockMvc.perform(MockMvcRequestBuilders.post("/admin/newSkill")
+      .param("skill", skill).with(csrf()))
       .andExpect(status().isCreated())
       .andExpect(content().string("Added new skill to the list"));
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   void testGetAllSkills() throws Exception {
     List<Skill> skills = Arrays.asList(new Skill(), new Skill());
 

@@ -22,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,6 +66,7 @@ class AdminServiceTest {
   @BeforeEach
   void setUp() {
     autoCloseable = MockitoAnnotations.openMocks(this);
+    LocalDate date = LocalDate.parse("1994-12-12");
     user = User.builder()
       .userId(Long.parseLong("1"))
       .email("abc@gmail.com")
@@ -71,7 +74,7 @@ class AdminServiceTest {
       .name("John")
       .contact(9876543210L)
       .gender('M')
-      .dateOfBirth("12-12-1994")
+      .dateOfBirth(date)
       .role(USER_ROLE.EMPLOYEE)
       .build();
   }

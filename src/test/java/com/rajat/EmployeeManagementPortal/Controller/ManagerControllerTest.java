@@ -24,6 +24,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,7 +69,9 @@ class ManagerControllerTest {
   @Test
   @WithMockUser(roles = "MANAGER")
   void testViewAll() throws Exception {
-    UserListResponse user = new UserListResponse("abc@example.com", "John", 9089564636L, 'M', "30/07/1998", USER_ROLE.EMPLOYEE);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    LocalDate date = LocalDate.parse("1998-07-30", formatter);
+    UserListResponse user = new UserListResponse("abc@example.com", "John", 9089564636L, 'M', date, USER_ROLE.EMPLOYEE);
     List<UserListResponse> employees = new ArrayList<>();
     employees.add(user);
 

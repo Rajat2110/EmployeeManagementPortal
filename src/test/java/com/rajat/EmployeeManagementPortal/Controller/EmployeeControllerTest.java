@@ -25,6 +25,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +71,9 @@ class EmployeeControllerTest {
   @Test
   @WithMockUser(username = "user", password = "password", roles = "EMPLOYEE")
   void testViewAllEmployees() throws Exception {
-    UserListResponse user = new UserListResponse("abc@example.com", "John", 9089564636L, 'M', "30/07/1998", USER_ROLE.EMPLOYEE);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    LocalDate date = LocalDate.parse("1998-07-30", formatter);
+    UserListResponse user = new UserListResponse("abc@example.com", "John", 9089564636L, 'M', date, USER_ROLE.EMPLOYEE);
     List<UserListResponse> employees = new ArrayList<>();
     employees.add(user);
 
@@ -143,7 +147,8 @@ class EmployeeControllerTest {
     String skill = "Java";
     when(employeeService.addSkill(skill)).thenReturn("Added new skill successfully");
 
-    mockMvc.perform(MockMvcRequestBuilders.post("/employee/addSkill/{skill}", skill).with(csrf()))
+    mockMvc.perform(MockMvcRequestBuilders.post("/employee/addSkill")
+      .param("skill", skill).with(csrf()))
       .andExpect(status().isOk())
       .andExpect(content().string("Added new skill successfully"));
   }

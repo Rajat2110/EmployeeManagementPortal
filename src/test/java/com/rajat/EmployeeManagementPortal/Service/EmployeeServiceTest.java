@@ -26,6 +26,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -73,6 +75,7 @@ class EmployeeServiceTest {
   void setUp() {
     closeable = MockitoAnnotations.openMocks(this);
     SecurityContextHolder.setContext(securityContext);
+    LocalDate date = LocalDate.parse("1994-12-12");
     user = User.builder()
       .userId(Long.parseLong("1"))
       .email("abc@gmail.com")
@@ -80,7 +83,7 @@ class EmployeeServiceTest {
       .name("John")
       .contact(9876543210L)
       .gender('M')
-      .dateOfBirth("12-12-1994")
+      .dateOfBirth(date)
       .role(USER_ROLE.EMPLOYEE)
       .build();
 
