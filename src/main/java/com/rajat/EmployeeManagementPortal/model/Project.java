@@ -35,7 +35,7 @@ public class Project {
     @ManyToOne
     private Manager manager;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "project")
     private List<Employee> employees;
 
 }
