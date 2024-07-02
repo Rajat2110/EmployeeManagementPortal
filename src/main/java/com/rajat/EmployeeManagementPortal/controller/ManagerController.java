@@ -11,7 +11,6 @@ import com.rajat.EmployeeManagementPortal.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,10 +43,9 @@ public class ManagerController {
                 managerService.getAllEmployees(skillName, unassigned));
     }
 
-    @GetMapping("/myProjects/{id}")
-    public ResponseEntity<List<ProjectListResponse>> projects(
-            @PathVariable Long id) {
-        return ResponseEntity.ok(projectService.managedProjects(id));
+    @GetMapping("/myProjects")
+    public ResponseEntity<List<ProjectListResponse>> projects() {
+        return ResponseEntity.ok(projectService.managedProjects());
     }
 
     @PostMapping("/request")

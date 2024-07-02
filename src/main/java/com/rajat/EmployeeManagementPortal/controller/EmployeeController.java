@@ -3,6 +3,7 @@ package com.rajat.EmployeeManagementPortal.controller;
 import com.rajat.EmployeeManagementPortal.model.Skill;
 import com.rajat.EmployeeManagementPortal.request.ChangePasswordRequest;
 import com.rajat.EmployeeManagementPortal.response.ProfileResponse;
+import com.rajat.EmployeeManagementPortal.response.ProjectListResponse;
 import com.rajat.EmployeeManagementPortal.response.UserListResponse;
 import com.rajat.EmployeeManagementPortal.service.EmployeeService;
 import com.rajat.EmployeeManagementPortal.service.ProjectService;
@@ -36,6 +37,11 @@ public class EmployeeController {
     @GetMapping("/profile")
     public ResponseEntity<ProfileResponse> getProfile() {
         return ResponseEntity.ok(employeeService.getProfile());
+    }
+
+    @GetMapping("/assignedProject")
+    public ResponseEntity<ProjectListResponse> assignedProject() {
+        return ResponseEntity.ok(projectService.assignedProject());
     }
 
     @PutMapping("/changePassword")

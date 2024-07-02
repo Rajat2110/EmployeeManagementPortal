@@ -1,17 +1,13 @@
 package com.rajat.EmployeeManagementPortal.service;
 
-import com.rajat.EmployeeManagementPortal.model.Employee;
-import com.rajat.EmployeeManagementPortal.model.Manager;
 import com.rajat.EmployeeManagementPortal.model.Request;
 import com.rajat.EmployeeManagementPortal.model.STATUS;
 import com.rajat.EmployeeManagementPortal.model.Skill;
-import com.rajat.EmployeeManagementPortal.model.USER_ROLE;
 import com.rajat.EmployeeManagementPortal.model.User;
-import com.rajat.EmployeeManagementPortal.repository.EmployeeRepository;
-import com.rajat.EmployeeManagementPortal.repository.ManagerRepository;
 import com.rajat.EmployeeManagementPortal.repository.RequestRepository;
 import com.rajat.EmployeeManagementPortal.repository.SkillRepository;
 import com.rajat.EmployeeManagementPortal.repository.UserRepository;
+import com.rajat.EmployeeManagementPortal.request.UpdateUserRequest;
 import com.rajat.EmployeeManagementPortal.response.AdminUserListResponse;
 import com.rajat.EmployeeManagementPortal.response.EmployeeListResponse;
 import jakarta.validation.Valid;
@@ -23,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 /**
  * Service class for Admin operations
@@ -31,12 +28,6 @@ import java.util.NoSuchElementException;
 public class AdminService {
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private EmployeeRepository employeeRepository;
-
-    @Autowired
-    private ManagerRepository managerRepository;
 
     @Autowired
     private RequestRepository requestRepository;
@@ -52,34 +43,19 @@ public class AdminService {
      * @param request The user details needed for registration
      * @return Success message upon successful registration
      */
-    @Transactional
     public String registerNewUser(@Valid User request) {
         try {
             //create a new user from the request fields
-            var newUser = User.builder()
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .name(request.getName())
-                    .contact(request.getContact())
-                    .gender(request.getGender())
-                    .dateOfBirth(request.getDateOfBirth())
-                    .role(request.getRole())
-                    .build();
+            var newUser = new User();
+            newUser.setEmail(request.getEmail());
+            newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+            newUser.setName(request.getName());
+            newUser.setContact(request.getContact());
+            newUser.setGender(request.getGender());
+            newUser.setDateOfBirth(request.getDateOfBirth());
+            newUser.setRole(request.getRole());
 
             userRepository.save(newUser);
-
-            //insert into manager or employee table according to  user role
-            if (newUser.getRole() == USER_ROLE.MANAGER) {
-                Manager manager = Manager.builder()
-                        .user(newUser)
-                        .build();
-                managerRepository.save(manager);
-            } else if (newUser.getRole() == USER_ROLE.EMPLOYEE) {
-                Employee employee = Employee.builder()
-                        .user(newUser)
-                        .build();
-                employeeRepository.save(employee);
-            }
             return "Registered new user successfully";
 
         } catch (Exception e) {
@@ -99,16 +75,14 @@ public class AdminService {
 
             //map the response to AdminListResponse dto
             for (User user : userList) {
-                AdminUserListResponse userOutput =
-                        AdminUserListResponse.builder()
-                                .userId(user.getUserId())
-                                .email(user.getEmail())
-                                .name(user.getName())
-                                .contact(user.getContact())
-                                .gender(user.getGender())
-                                .dateOfBirth(user.getDateOfBirth())
-                                .role(user.getRole())
-                                .build();
+                AdminUserListResponse userOutput = new AdminUserListResponse();
+                userOutput.setUserId(user.getUserId());
+                userOutput.setEmail(user.getEmail());
+                userOutput.setName(user.getName());
+                userOutput.setContact(user.getContact());
+                userOutput.setGender(user.getGender());
+                userOutput.setDateOfBirth(user.getDateOfBirth());
+                userOutput.setRole(user.getRole());
                 usersToDisplay.add(userOutput);
             }
             return usersToDisplay;
@@ -122,7 +96,7 @@ public class AdminService {
      * @param details The user details required for update
      * @return Success message upon successful update
      */
-    public String updateEmployee(User details) {
+    public String updateEmployee(UpdateUserRequest details) {
         //find the user using userId
         User foundUser = userRepository.findByUserId(details.getUserId())
                 .orElseThrow(() -> new NoSuchElementException(
@@ -185,8 +159,7 @@ public class AdminService {
      */
     public List<Request> viewRequests() {
         try {
-            List<Request> requests = requestRepository.findAll();
-            return requests;
+            return requestRepository.findAll();
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve requests");
         }
@@ -198,23 +171,18 @@ public class AdminService {
      * @return Success message upon successful addition of the skill
      */
     public String addNewSkill(String skill) {
-        try {
-            //check if the skill already exists
-            if (skillRepository.findBySkillName(skill) != null) {
-                throw new IllegalArgumentException("This skill already exists");
-            }
-
-            //create new skill using the skill name from the request
-            var newSkill = Skill.builder()
-                    .skillName(skill)
-                    .build();
-
-            //save the new skill
-            skillRepository.save(newSkill);
-            return "Added new skill to the list";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        //check if the skill already exists
+        if (skillRepository.findBySkillNameIgnoreCase(skill) != null) {
+            throw new IllegalArgumentException("This skill already exists");
         }
+
+        //create new skill using the skill name from the request
+        var newSkill = new Skill();
+        newSkill.setSkillName(skill);
+
+        //save the new skill
+        skillRepository.save(newSkill);
+        return "Added new skill to the list";
     }
 
     /**
@@ -238,6 +206,18 @@ public class AdminService {
      */
     public List<EmployeeListResponse> allEmployees(String skillName,
                                                    boolean unassigned) {
-        return employeeRepository.findAllEmployeeDetails(skillName, unassigned);
+        List<User> employees = userRepository.findEmployees(skillName, unassigned);
+        return employees.stream().map(this::convertToEmployeeListResponse).collect(
+                Collectors.toList());
+    }
+
+    private EmployeeListResponse convertToEmployeeListResponse(User user) {
+        List<String> skills = user.getSkills().stream()
+                .map(employeeSkill -> employeeSkill.getSkill().getSkillName())
+                .toList();
+
+        String[] skillsArray = skills.toArray(new String[0]);
+        String projectName = user.getProject() != null ? user.getProject().getProjectName() : null;
+        return new EmployeeListResponse(user.getUserId(), user.getName(), skillsArray, projectName);
     }
 }

@@ -2,8 +2,6 @@ package com.rajat.EmployeeManagementPortal.service;
 
 import com.rajat.EmployeeManagementPortal.model.Request;
 import com.rajat.EmployeeManagementPortal.model.User;
-import com.rajat.EmployeeManagementPortal.repository.EmployeeRepository;
-import com.rajat.EmployeeManagementPortal.repository.ManagerRepository;
 import com.rajat.EmployeeManagementPortal.repository.RequestRepository;
 import com.rajat.EmployeeManagementPortal.repository.UserRepository;
 import com.rajat.EmployeeManagementPortal.request.ChangePasswordRequest;
@@ -20,18 +18,13 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 /**
  * Service class for manager operations
  */
 @Service
 public class ManagerService {
-
-    @Autowired
-    private EmployeeRepository employeeRepository;
-
-    @Autowired
-    private ManagerRepository managerRepository;
 
     @Autowired
     private RequestRepository requestRepository;
@@ -52,14 +45,13 @@ public class ManagerService {
 
         //map the found user list to UserListResponse dto
         for (User user : userList) {
-            UserListResponse userOutput = UserListResponse.builder()
-                    .email(user.getEmail())
-                    .name(user.getName())
-                    .contact(user.getContact())
-                    .gender(user.getGender())
-                    .dateOfBirth(user.getDateOfBirth())
-                    .role(user.getRole())
-                    .build();
+            UserListResponse userOutput = new UserListResponse();
+            userOutput.setEmail(user.getEmail());
+            userOutput.setName(user.getName());
+            userOutput.setGender(user.getGender());
+            userOutput.setDateOfBirth(user.getDateOfBirth());
+            userOutput.setRole(user.getRole());
+
             usersToDisplay.add(userOutput);
         }
         return usersToDisplay;
@@ -78,12 +70,11 @@ public class ManagerService {
         String name = user.getName();
 
         //create a new request based on the details in the request
-        Request employeeRequest = Request.builder()
-                .skill(request.getSkillName())
-                .requestedBy(name)
-                .employeesRequired(request.getNumOfEmployees())
-                .status(request.getStatus())
-                .build();
+        Request employeeRequest = new Request();
+        employeeRequest.setSkill(request.getSkillName());
+        employeeRequest.setRequestedBy(name);
+        employeeRequest.setEmployeesRequired(request.getNumOfEmployees());
+        employeeRequest.setStatus(request.getStatus());
 
         requestRepository.save(employeeRequest);
         return "Request submitted successfully.";
@@ -96,8 +87,20 @@ public class ManagerService {
      * @return List of all the employees with filter (if any)
      */
     public List<EmployeeListResponse> getAllEmployees(String skillName,
-                                                      boolean unassigned) {
-        return employeeRepository.findAllEmployeeDetails(skillName, unassigned);
+                                                   boolean unassigned) {
+        List<User> employees = userRepository.findEmployees(skillName, unassigned);
+        return employees.stream().map(this::convertToEmployeeListResponse).collect(
+                Collectors.toList());
+    }
+
+    private EmployeeListResponse convertToEmployeeListResponse(User user) {
+        List<String> skills = user.getSkills().stream()
+                .map(employeeSkill -> employeeSkill.getSkill().getSkillName())
+                .toList();
+
+        String[] skillsArray = skills.toArray(new String[0]);
+        String projectName = user.getProject() != null ? user.getProject().getProjectName() : null;
+        return new EmployeeListResponse(user.getUserId(), user.getName(), skillsArray, projectName);
     }
 
     /**

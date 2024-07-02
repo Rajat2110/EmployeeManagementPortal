@@ -1,7 +1,6 @@
 package com.rajat.EmployeeManagementPortal.Config;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +14,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.rajat.EmployeeManagementPortal.model.USER_ROLE.ADMIN;
 import static com.rajat.EmployeeManagementPortal.model.USER_ROLE.EMPLOYEE;
@@ -24,7 +23,6 @@ import static com.rajat.EmployeeManagementPortal.model.USER_ROLE.MANAGER;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     @Autowired
@@ -44,8 +42,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests((authorize) -> authorize
-                                .requestMatchers("/auth/**", "/auth/userProfile",
-                                        "/css/**", "/js/**")
+                                .requestMatchers("/auth/**")
                                 .permitAll() //whitelist (no authorization required)
                                 .requestMatchers("/admin/**")
                                 .hasAnyAuthority(ADMIN.name())
@@ -72,11 +69,11 @@ public class SecurityConfig {
                 CorsConfiguration cfg = new CorsConfiguration();
 
                 //cors setAllowedOrigins for front-end requests
-                cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+                cfg.setAllowedOrigins(List.of("http://localhost:3000"));
                 cfg.setAllowedMethods(Collections.singletonList("*"));
                 cfg.setAllowCredentials(true);
                 cfg.setAllowedHeaders(Collections.singletonList("*"));
-                cfg.setExposedHeaders(Arrays.asList("Authorization"));
+                cfg.setExposedHeaders(List.of("Authorization"));
                 cfg.setMaxAge(3600L);
 
                 return cfg;

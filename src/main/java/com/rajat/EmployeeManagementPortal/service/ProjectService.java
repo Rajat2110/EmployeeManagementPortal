@@ -1,14 +1,14 @@
 package com.rajat.EmployeeManagementPortal.service;
 
-import com.rajat.EmployeeManagementPortal.model.Employee;
-import com.rajat.EmployeeManagementPortal.model.Manager;
 import com.rajat.EmployeeManagementPortal.model.Project;
-import com.rajat.EmployeeManagementPortal.repository.EmployeeRepository;
-import com.rajat.EmployeeManagementPortal.repository.ManagerRepository;
+import com.rajat.EmployeeManagementPortal.model.User;
 import com.rajat.EmployeeManagementPortal.repository.ProjectRepository;
+import com.rajat.EmployeeManagementPortal.repository.UserRepository;
 import com.rajat.EmployeeManagementPortal.request.CreateProjectRequest;
 import com.rajat.EmployeeManagementPortal.response.ProjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,10 +24,7 @@ public class ProjectService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private ManagerRepository managerRepository;
-
-    @Autowired
-    private EmployeeRepository employeeRepository;
+    private UserRepository userRepository;
 
     /**
      * Retrieves a list of all projects
@@ -49,14 +46,13 @@ public class ProjectService {
                     "Project with this name already exists!");
         }
 
-        Manager manager = managerRepository.findById(request.getManagerId())
+        User manager = userRepository.findByUserId(request.getManagerId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Manager not found with specified id."));
-        var project = Project.builder()
-                .projectName(request.getProjectName())
-                .createdAt(request.getCreatedAt())
-                .manager(manager)
-                .build();
+        var project = new Project();
+        project.setProjectName(request.getProjectName());
+        project.setCreatedAt(request.getCreatedAt());
+        project.setManager(manager);
 
         projectRepository.save(project);
         return "Project Created";
@@ -73,12 +69,12 @@ public class ProjectService {
                 .orElseThrow(() -> new NoSuchElementException(
                         "No project found with this name"));
 
-        Employee emp = employeeRepository.findById(empId)
+        User emp = userRepository.findByUserId(empId)
                 .orElseThrow(() -> new NoSuchElementException(
                         "No employee found with this id"));
 
         emp.setProject(project);
-        employeeRepository.save(emp);
+        userRepository.save(emp);
         return "Project assigned to the employee";
     }
 
@@ -88,22 +84,24 @@ public class ProjectService {
      * @return Success message upon successful removal of employee from project
      */
     public String unassignProject(Long empId) {
-        Employee emp = employeeRepository.findById(empId)
+        User emp = userRepository.findByUserId(empId)
                 .orElseThrow(() -> new NoSuchElementException(
                         "No employee found with this id"));
 
         emp.setProject(null);
-        employeeRepository.save(emp);
+        userRepository.save(emp);
         return "Unassigned Employee from the project successfully";
     }
 
     /**
      * Retrieves a list of projects managed by a manager
-     * @param managerId The id of the manager
      * @return List of projects managed by the manager
      */
-    public List<ProjectListResponse> managedProjects(Long managerId) {
-        return projectRepository.findByManagerUserId(managerId);
+    public List<ProjectListResponse> managedProjects() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        return projectRepository.findByManagerUserId(user.getUserId());
     }
 
     /**
@@ -117,6 +115,23 @@ public class ProjectService {
             return "Project deleted successfully";
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException("No project exists with this id");
+        }
+    }
+
+    /**
+     * Finds the project currently assigned to employee
+     * @return The project assigned to the employee
+     */
+    public ProjectListResponse assignedProject() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        if (user.getProject() != null) {
+            Project project = user.getProject();
+            Long projectId = project.getId();
+            return projectRepository.findAssignedProject(projectId);
+        } else {
+            throw new NoSuchElementException("No project assigned to employee yet");
         }
     }
 }

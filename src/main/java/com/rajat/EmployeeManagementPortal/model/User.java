@@ -1,6 +1,5 @@
 package com.rajat.EmployeeManagementPortal.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,17 +7,15 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,10 +25,6 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "\"user\"")
 public class User implements UserDetails {
 
@@ -60,11 +53,98 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private USER_ROLE role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Employee employee;
+    @OneToMany(mappedBy = "manager")
+    private List<Project> projects;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Manager manager;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @OneToMany(mappedBy = "user")
+    private List<EmployeeSkill> skills;
+
+    public User() {}
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Long getContact() {
+        return contact;
+    }
+
+    public Character getGender() {
+        return gender;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public USER_ROLE getRole() {
+        return role;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public List<EmployeeSkill> getSkills() {
+        return skills;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setContact(Long contact) {
+        this.contact = contact;
+    }
+
+    public void setGender(Character gender) {
+        this.gender = gender;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public void setRole(USER_ROLE role) {
+        this.role = role;
+    }
+
+    public void setProjects(
+            List<Project> projects) {
+        this.projects = projects;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

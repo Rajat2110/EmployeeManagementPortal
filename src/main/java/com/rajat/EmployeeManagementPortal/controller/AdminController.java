@@ -5,6 +5,7 @@ import com.rajat.EmployeeManagementPortal.model.STATUS;
 import com.rajat.EmployeeManagementPortal.model.Skill;
 import com.rajat.EmployeeManagementPortal.model.User;
 import com.rajat.EmployeeManagementPortal.request.CreateProjectRequest;
+import com.rajat.EmployeeManagementPortal.request.UpdateUserRequest;
 import com.rajat.EmployeeManagementPortal.response.AdminUserListResponse;
 import com.rajat.EmployeeManagementPortal.response.EmployeeListResponse;
 import com.rajat.EmployeeManagementPortal.response.ProjectListResponse;
@@ -108,7 +109,8 @@ public class AdminController {
     }
 
     @PutMapping("/updateUser")
-    public ResponseEntity<String> updateEmployee(@RequestBody User details) {
+    public ResponseEntity<String> updateEmployee(@RequestBody
+                                                 UpdateUserRequest details) {
         return ResponseEntity.ok(adminService.updateEmployee(details));
     }
 

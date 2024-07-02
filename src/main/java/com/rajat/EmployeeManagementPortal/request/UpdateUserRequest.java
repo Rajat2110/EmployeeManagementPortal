@@ -1,30 +1,33 @@
-package com.rajat.EmployeeManagementPortal.response;
+package com.rajat.EmployeeManagementPortal.request;
 
 import com.rajat.EmployeeManagementPortal.model.USER_ROLE;
 
-import java.time.LocalDate;
+public class UpdateUserRequest {
 
-public class UserListResponse {
-
+    private Long userId;
     private String email;
     private String name;
     private Long contact;
-    private Character gender;
-    private LocalDate dateOfBirth;
     private USER_ROLE role;
 
-    public UserListResponse(String email, String name, Long contact,
-                            Character gender, LocalDate dateOfBirth,
-                            USER_ROLE role) {
+    public UpdateUserRequest(Long userId, String email, String name, Long contact,
+                             USER_ROLE role) {
+        this.userId = userId;
         this.email = email;
         this.name = name;
         this.contact = contact;
-        this.gender = gender;
-        this.dateOfBirth = dateOfBirth;
         this.role = role;
     }
 
-    public UserListResponse() {
+    public UpdateUserRequest() {
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getEmail() {
@@ -49,22 +52,6 @@ public class UserListResponse {
 
     public void setContact(Long contact) {
         this.contact = contact;
-    }
-
-    public Character getGender() {
-        return gender;
-    }
-
-    public void setGender(Character gender) {
-        this.gender = gender;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
     }
 
     public USER_ROLE getRole() {

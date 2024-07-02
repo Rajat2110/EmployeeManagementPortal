@@ -9,6 +9,6 @@ import java.util.List;
 public interface EmployeeSkillRepository
         extends JpaRepository<EmployeeSkill, Long> {
 
-    @Query("SELECT es.skill.skillName FROM EmployeeSkill es WHERE es.employee.userId = :id")
+    @Query("SELECT es.skill.skillName FROM EmployeeSkill es WHERE es.user.userId = :id")
     List<String> findSkillsById(Long id);
 }

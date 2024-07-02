@@ -1,11 +1,9 @@
 package com.rajat.EmployeeManagementPortal.service;
 
-import com.rajat.EmployeeManagementPortal.model.Employee;
 import com.rajat.EmployeeManagementPortal.model.EmployeeSkill;
 import com.rajat.EmployeeManagementPortal.model.Project;
 import com.rajat.EmployeeManagementPortal.model.Skill;
 import com.rajat.EmployeeManagementPortal.model.User;
-import com.rajat.EmployeeManagementPortal.repository.EmployeeRepository;
 import com.rajat.EmployeeManagementPortal.repository.EmployeeSkillRepository;
 import com.rajat.EmployeeManagementPortal.repository.SkillRepository;
 import com.rajat.EmployeeManagementPortal.repository.UserRepository;
@@ -32,9 +30,6 @@ public class EmployeeService {
     private UserRepository userRepository;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
-
-    @Autowired
     private SkillRepository skillRepository;
 
     @Autowired
@@ -53,11 +48,13 @@ public class EmployeeService {
         List<UserListResponse> usersToDisplay = new ArrayList<>();
 
         for (User user : userList) {
-            UserListResponse userOutput = UserListResponse.builder()
-                    .email(user.getEmail())
-                    .name(user.getName())
-                    .role(user.getRole())
-                    .build();
+            UserListResponse userOutput = new UserListResponse();
+            userOutput.setEmail(user.getEmail());
+            userOutput.setName(user.getName());
+            userOutput.setGender(user.getGender());
+            userOutput.setDateOfBirth(user.getDateOfBirth());
+            userOutput.setRole(user.getRole());
+
             usersToDisplay.add(userOutput);
         }
         return usersToDisplay;
@@ -68,26 +65,30 @@ public class EmployeeService {
      * @return Profile in the ProfileResponse format
      */
     public ProfileResponse getProfile() {
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+        try {
+            Authentication authentication =
+                    SecurityContextHolder.getContext().getAuthentication();
+            User user = (User) authentication.getPrincipal();
 
-        Employee emp = employeeRepository.findById(user.getUserId()).get();
-        Project project = emp.getProject();
+            Project project = user.getProject();
 
-        List<String> skillList =
-                employeeSkillRepository.findSkillsById(user.getUserId());
+            List<String> skillList =
+                    employeeSkillRepository.findSkillsById(user.getUserId());
 
-        return ProfileResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .contact(user.getContact())
-                .gender(user.getGender())
-                .dateOfBirth(user.getDateOfBirth())
-                .role(user.getRole())
-                .projectName(project != null ? project.getProjectName() : null)
-                .skills(skillList)
-                .build();
+            ProfileResponse profile = new ProfileResponse();
+            profile.setEmail(user.getEmail());
+            profile.setName(user.getName());
+            profile.setContact(user.getContact());
+            profile.setGender(user.getGender());
+            profile.setDateOfBirth(user.getDateOfBirth());
+            profile.setRole(user.getRole());
+            profile.setProjectName(project != null ? project.getProjectName() : null);
+            profile.setSkills(skillList != null ? skillList : null);
+
+            return profile;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -136,13 +137,11 @@ public class EmployeeService {
                     SecurityContextHolder.getContext().getAuthentication();
             User user = (User) authentication.getPrincipal();
 
-            Employee emp = employeeRepository.findById(user.getUserId()).get();
-            Skill foundSkill = skillRepository.findBySkillName(skill);
+            Skill foundSkill = skillRepository.findBySkillNameIgnoreCase(skill);
 
-            var empSkill = EmployeeSkill.builder()
-                    .employee(emp)
-                    .skill(foundSkill)
-                    .build();
+            var empSkill = new EmployeeSkill();
+            empSkill.setUser(user);
+            empSkill.setSkill(foundSkill);
 
             employeeSkillRepository.save(empSkill);
             return "Added new skill successfully";
